@@ -20,7 +20,6 @@ class QuoteRepository(
         get() = quotesLiveData
 
     suspend fun getQuotes(page: Int) {
-
         if (NetworkUtils.isInternetAvailable(applicationContext)) {
             val result = quoteService.getQuotes(page)
             if (result.body() != null) {
@@ -35,6 +34,17 @@ class QuoteRepository(
             } catch (e: Exception) {
                 Log.e("QuotesMVVM", "Error in accessing db: ${e.message}")
             }
+        }
+    }
+
+    /*
+    Method to get quotes from random page
+     */
+    suspend fun getQuotesBackground() {
+        val randomNumber = (Math.random() * 10).toInt()
+        val result = quoteService.getQuotes(randomNumber)
+        if (result.body() != null) {
+            result.body()?.let { quoteDatabase.quoteDao().addQuotes(it.results) }
         }
     }
 }
