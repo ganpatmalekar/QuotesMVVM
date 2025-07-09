@@ -15,24 +15,35 @@ class QuoteRepository(
     private val applicationContext: Context
 ) {
 
-    private val quotesLiveData = MutableLiveData<QuoteList>()
-    val quotes: LiveData<QuoteList>
+    private val quotesLiveData = MutableLiveData<Response<QuoteList>>()
+    val quotes: LiveData<Response<QuoteList>>
         get() = quotesLiveData
 
     suspend fun getQuotes(page: Int) {
         if (NetworkUtils.isInternetAvailable(applicationContext)) {
-            val result = quoteService.getQuotes(page)
-            if (result.body() != null) {
-                result.body()?.let { quoteDatabase.quoteDao().addQuotes(it.results) }
-                quotesLiveData.postValue(result.body())
+            quotesLiveData.postValue(Response.Loading())
+            try {
+                val result = quoteService.getQuotes(page)
+                if (result.body() != null) {
+                    result.body()?.let { quoteDatabase.quoteDao().addQuotes(it.results) }
+                    quotesLiveData.postValue(Response.Success(result.body()))
+                } else {
+                    quotesLiveData.postValue(
+                        Response.Error(
+                            "API failed with status code ${result.code()}"
+                        )
+                    )
+                }
+            } catch (e: Exception) {
+                quotesLiveData.postValue(Response.Error(e.message.toString()))
             }
         } else {
             try {
                 val quotes = quoteDatabase.quoteDao().getQuotes()
                 val quoteList = QuoteList(1, 1, 1, quotes, 10, 10)
-                quotesLiveData.postValue(quoteList)
+                quotesLiveData.postValue(Response.Success(quoteList))
             } catch (e: Exception) {
-                Log.e("QuotesMVVM", "Error in accessing db: ${e.message}")
+                quotesLiveData.postValue(Response.Error(e.message.toString()))
             }
         }
     }
