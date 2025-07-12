@@ -11,6 +11,7 @@ data class Result(
     val author: String,
     val authorSlug: String,
     val content: String,
+    val tags: ArrayList<String> = arrayListOf(),
     val dateAdded: String,
     val dateModified: String,
     val length: Int,
