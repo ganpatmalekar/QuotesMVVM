@@ -3,6 +3,7 @@ package com.gsm.quotesmvvm.adapters
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.chip.Chip
 import com.gsm.quotesmvvm.databinding.QuoteItemBinding
 import com.gsm.quotesmvvm.models.Result
 
@@ -32,6 +33,22 @@ class QuoteListAdapter(val quoteList: List<Result>) :
             binding.apply {
                 tvQuote.text = item.content
                 tvAuthor.text = item.author
+
+                // Clear previously added chips
+                cgTags.removeAllViews()
+                addTagsAsChip(item)
+            }
+        }
+
+        // Method to create dynamic chips of Tags
+        private fun QuoteItemBinding.addTagsAsChip(item: Result) {
+            for (tag in item.tags) {
+                val chip = Chip(cgTags.context).apply {
+                    text = tag
+                    isClickable = false
+                    isCheckable = false
+                }
+                cgTags.addView(chip)
             }
         }
     }

@@ -38,9 +38,12 @@ class QuoteListFragment : Fragment() {
             when (it) {
                 is Response.Loading -> {
                     Log.d("QuotesMVVM", "Response -> Loading...")
+                    binding.lottieView.visibility = View.VISIBLE
                 }
 
                 is Response.Success -> {
+                    binding.lottieView.visibility = View.GONE
+
                     it.data?.let { quotes ->
                         Log.d("QuotesMVVM", "Response -> Quotes Size: ${quotes.results.size}")
                         setupRecyclerView(quotes.results)
@@ -49,6 +52,7 @@ class QuoteListFragment : Fragment() {
 
                 is Response.Error -> {
                     Log.e("QuotesMVVM", "Response -> Error: ${it.errorMessage}")
+                    binding.lottieView.visibility = View.GONE
                 }
             }
         }
