@@ -20,6 +20,7 @@ ksp = "2.1.21-2.0.2"
 workRuntimeKtx = "2.10.2"
 fragment = "1.8.8"
 recyclerview = "1.4.0"
+safeArgs = "2.9.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -51,4 +52,5 @@ androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview"
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 google-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp"}
+androidx-navigation-safe-args = { id = "androidx.navigation.safeargs.kotlin", version.ref = "safeArgs" }
 

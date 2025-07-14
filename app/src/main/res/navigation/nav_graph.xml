@@ -18,5 +18,10 @@
         android:id="@+id/quoteDetailsFragment"
         android:name="com.gsm.quotesmvvm.QuoteDetailsFragment"
         android:label="fragment_quote_details"
-        tools:layout="@layout/fragment_quote_details" />
+        tools:layout="@layout/fragment_quote_details">
+        <argument
+            android:name="quoteItem"
+            app:argType="com.gsm.quotesmvvm.models.Result"
+            app:nullable="false" />
+    </fragment>
 </navigation>

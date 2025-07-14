@@ -2,11 +2,12 @@ package com.gsm.quotesmvvm
 
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.gsm.quotesmvvm.adapters.QuoteListAdapter
 import com.gsm.quotesmvvm.databinding.FragmentQuoteListBinding
@@ -63,7 +64,10 @@ class QuoteListFragment : Fragment() {
     }
 
     private fun setupRecyclerView(quotes: List<Result>) {
-        val quotesAdapter = QuoteListAdapter(quotes)
+        val quotesAdapter = QuoteListAdapter(quotes, onItemClick = {
+            val action = QuoteListFragmentDirections.actionNavigateToQuoteDetailsFragment(it)
+            findNavController().navigate(action)
+        })
         binding.rvQuotes.apply {
             layoutManager = LinearLayoutManager(requireActivity())
             adapter = quotesAdapter

@@ -7,7 +7,7 @@ import com.google.android.material.chip.Chip
 import com.gsm.quotesmvvm.databinding.QuoteItemBinding
 import com.gsm.quotesmvvm.models.Result
 
-class QuoteListAdapter(val quoteList: List<Result>) :
+class QuoteListAdapter(val quoteList: List<Result>, private val onItemClick: (Result) -> Unit) :
     RecyclerView.Adapter<QuoteListAdapter.QuoteListViewHolder>() {
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -37,6 +37,10 @@ class QuoteListAdapter(val quoteList: List<Result>) :
                 // Clear previously added chips
                 cgTags.removeAllViews()
                 addTagsAsChip(item)
+
+                root.setOnClickListener {
+                    onItemClick(item)
+                }
             }
         }
 

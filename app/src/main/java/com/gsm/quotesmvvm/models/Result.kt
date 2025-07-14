@@ -1,8 +1,11 @@
 package com.gsm.quotesmvvm.models
 
+import android.os.Parcelable
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 @Entity("quote")
 data class Result(
     @PrimaryKey(autoGenerate = true)
@@ -15,4 +18,4 @@ data class Result(
     val dateAdded: String,
     val dateModified: String,
     val length: Int,
-)
+) : Parcelable
