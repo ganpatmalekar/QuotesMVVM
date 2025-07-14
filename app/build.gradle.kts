@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.google.ksp)
+    id("kotlin-parcelize")
+    alias(libs.plugins.androidx.navigation.safe.args)
 }
 
 android {
@@ -34,6 +36,9 @@ android {
     kotlin {
         jvmToolchain(11)
     }
+    buildFeatures {
+        viewBinding = true
+    }
 }
 
 dependencies {
@@ -43,6 +48,8 @@ dependencies {
     implementation(libs.material)
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.fragment)
+    implementation(libs.androidx.recyclerview)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -66,4 +73,9 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     // Work Manager
     implementation(libs.androidx.work.runtime.ktx)
+    // Navigation
+    implementation(libs.androidx.navigation.fragment.ktx)
+    implementation(libs.androidx.navigation.ui.ktx)
+    // Lottie Animation
+    implementation(libs.lottie)
 }

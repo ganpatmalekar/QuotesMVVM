@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">QuotesMVVM</string>
+    <string name="app_name">Quotes Daily</string>
+    <string name="share_quote">Share Quote</string>
 </resources>
