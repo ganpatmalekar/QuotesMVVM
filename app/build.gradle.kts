@@ -78,4 +78,6 @@ dependencies {
     implementation(libs.androidx.navigation.ui.ktx)
     // Lottie Animation
     implementation(libs.lottie)
+    // Splash Screen
+    implementation(libs.androidx.core.splashscreen)
 }
