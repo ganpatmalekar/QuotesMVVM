@@ -20,4 +20,16 @@ class QuoteViewModel(private val repository: QuoteRepository) : ViewModel() {
 
     val quotes: LiveData<Response<QuoteList>>
         get() = repository.quotes
+
+    fun retryFetchingQuotes(page: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.getQuotes(page)
+        }
+    }
+
+    fun loadQuotesFromDB() {
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.getQuotesFromDB()
+        }
+    }
 }
