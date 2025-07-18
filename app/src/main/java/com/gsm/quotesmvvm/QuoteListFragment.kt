@@ -7,6 +7,7 @@ import android.text.Spanned
 import android.text.TextPaint
 import android.text.method.LinkMovementMethod
 import android.text.style.ClickableSpan
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -45,11 +46,13 @@ class QuoteListFragment : Fragment() {
                 is Response.Loading -> {
                     binding.loadingAnim.visibility = View.VISIBLE
                     binding.clNoNetworkContainer.visibility = View.GONE
+                    binding.clErrorContainer.visibility = View.GONE
                 }
 
                 is Response.Success -> {
                     binding.loadingAnim.visibility = View.GONE
                     binding.clNoNetworkContainer.visibility = View.GONE
+                    binding.clErrorContainer.visibility = View.GONE
 
                     it.data?.let { quotes ->
                         setupRecyclerView(quotes.results)
@@ -57,6 +60,9 @@ class QuoteListFragment : Fragment() {
                 }
 
                 is Response.Error -> {
+                    // Log.e("QuotesMVVM Error: ", it.errorMessage.toString())
+                    makeSpannableErrorString()
+                    binding.clErrorContainer.visibility = View.VISIBLE
                     binding.loadingAnim.visibility = View.GONE
                     binding.clNoNetworkContainer.visibility = View.GONE
                 }
@@ -65,6 +71,7 @@ class QuoteListFragment : Fragment() {
                     makeSpannableString()
                     binding.clNoNetworkContainer.visibility = View.VISIBLE
                     binding.loadingAnim.visibility = View.GONE
+                    binding.clErrorContainer.visibility = View.GONE
                 }
             }
         }
@@ -85,29 +92,38 @@ class QuoteListFragment : Fragment() {
         }
     }
 
+    private fun makeSpannableErrorString() {
+        val errorStr = getString(R.string.error_string)
+        val spannableString = SpannableString(errorStr)
+
+        val start = errorStr.indexOf("try again")
+        val end = start + "try again".length
+
+        val tryAgainSpan = createClickableSpan(true)
+        spannableString.setSpan(
+            tryAgainSpan,
+            start,
+            end,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+
+        binding.tvError.apply {
+            text = spannableString
+            movementMethod = LinkMovementMethod.getInstance()
+            highlightColor = Color.TRANSPARENT
+        }
+    }
+
     private fun makeSpannableString() {
         val noNetworkStr =
-            "No network! Please check your internet connection and\ntry again or load data from local server"
+            getString(R.string.no_network_text)
 
         val spannableString = SpannableString(noNetworkStr)
         // Define clickable span for "try again"
         val tryAgainStart = noNetworkStr.indexOf("try again")
         val tryAgainEnd = tryAgainStart + "try again".length
 
-        val tryAgainSpan = object : ClickableSpan() {
-            override fun onClick(widget: View) {
-                // Try fetching quotes again
-                val randomNumber = (Math.random() * 10).toInt()
-                quoteViewModel.retryFetchingQuotes(randomNumber)
-            }
-
-            override fun updateDrawState(ds: TextPaint) {
-                super.updateDrawState(ds)
-                ds.color = Color.BLUE
-                ds.isUnderlineText = false
-            }
-        }
-
+        val tryAgainSpan = createClickableSpan(true)
         spannableString.setSpan(
             tryAgainSpan,
             tryAgainStart,
@@ -119,19 +135,7 @@ class QuoteListFragment : Fragment() {
         val loadDataStart = noNetworkStr.indexOf("load data")
         val loadDataEnd = loadDataStart + "load data".length
 
-        val loadDataSpan = object : ClickableSpan() {
-            override fun onClick(widget: View) {
-                // Load quotes from DB
-                quoteViewModel.loadQuotesFromDB()
-            }
-
-            override fun updateDrawState(ds: TextPaint) {
-                super.updateDrawState(ds)
-                ds.color = Color.BLUE
-                ds.isUnderlineText = false
-            }
-        }
-
+        val loadDataSpan = createClickableSpan(false)
         spannableString.setSpan(
             loadDataSpan,
             loadDataStart,
@@ -144,6 +148,28 @@ class QuoteListFragment : Fragment() {
             movementMethod = LinkMovementMethod.getInstance()
             highlightColor = Color.TRANSPARENT
         }
+    }
+
+    private fun createClickableSpan(isFromServer: Boolean): ClickableSpan {
+        val clickableSpan = object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                if (isFromServer) {
+                    // Try fetching quotes again
+                    val randomNumber = (Math.random() * 10).toInt()
+                    quoteViewModel.retryFetchingQuotes(randomNumber)
+                } else {
+                    // Load data from DB
+                    quoteViewModel.loadQuotesFromDB()
+                }
+            }
+
+            override fun updateDrawState(ds: TextPaint) {
+                super.updateDrawState(ds)
+                ds.color = Color.BLUE
+                ds.isUnderlineText = false
+            }
+        }
+        return clickableSpan
     }
 
     override fun onDestroyView() {
