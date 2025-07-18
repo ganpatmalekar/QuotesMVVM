@@ -19,8 +19,8 @@ class QuoteRepository(
         get() = quotesLiveData
 
     suspend fun getQuotes(page: Int) {
+        quotesLiveData.postValue(Response.Loading())
         if (NetworkUtils.isInternetAvailable(applicationContext)) {
-            quotesLiveData.postValue(Response.Loading())
             try {
                 val result = quoteService.getQuotes(page)
                 if (result.body() != null) {
@@ -37,13 +37,21 @@ class QuoteRepository(
                 quotesLiveData.postValue(Response.Error(e.message.toString()))
             }
         } else {
-            try {
-                val quotes = quoteDatabase.quoteDao().getQuotes()
-                val quoteList = QuoteList(1, 1, 1, quotes, 10, 10)
-                quotesLiveData.postValue(Response.Success(quoteList))
-            } catch (e: Exception) {
-                quotesLiveData.postValue(Response.Error(e.message.toString()))
-            }
+            quotesLiveData.postValue(Response.NoNetwork())
+        }
+    }
+
+    /*
+    * Method to load data from DB
+    * */
+    suspend fun getQuotesFromDB() {
+        quotesLiveData.postValue(Response.Loading())
+        try {
+            val quotes = quoteDatabase.quoteDao().getQuotes()
+            val quoteList = QuoteList(1, 1, 1, quotes, 10, 10)
+            quotesLiveData.postValue(Response.Success(quoteList))
+        } catch (e: Exception) {
+            quotesLiveData.postValue(Response.Error(e.message.toString()))
         }
     }
 

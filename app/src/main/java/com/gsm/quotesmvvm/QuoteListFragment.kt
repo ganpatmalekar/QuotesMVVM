@@ -1,7 +1,12 @@
 package com.gsm.quotesmvvm
 
+import android.graphics.Color
 import android.os.Bundle
-import android.util.Log
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.TextPaint
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -38,22 +43,28 @@ class QuoteListFragment : Fragment() {
         quoteViewModel.quotes.observe(viewLifecycleOwner) {
             when (it) {
                 is Response.Loading -> {
-                    Log.d("QuotesMVVM", "Response -> Loading...")
-                    binding.lottieView.visibility = View.VISIBLE
+                    binding.loadingAnim.visibility = View.VISIBLE
+                    binding.clNoNetworkContainer.visibility = View.GONE
                 }
 
                 is Response.Success -> {
-                    binding.lottieView.visibility = View.GONE
+                    binding.loadingAnim.visibility = View.GONE
+                    binding.clNoNetworkContainer.visibility = View.GONE
 
                     it.data?.let { quotes ->
-                        Log.d("QuotesMVVM", "Response -> Quotes Size: ${quotes.results.size}")
                         setupRecyclerView(quotes.results)
                     }
                 }
 
                 is Response.Error -> {
-                    Log.e("QuotesMVVM", "Response -> Error: ${it.errorMessage}")
-                    binding.lottieView.visibility = View.GONE
+                    binding.loadingAnim.visibility = View.GONE
+                    binding.clNoNetworkContainer.visibility = View.GONE
+                }
+
+                is Response.NoNetwork -> {
+                    makeSpannableString()
+                    binding.clNoNetworkContainer.visibility = View.VISIBLE
+                    binding.loadingAnim.visibility = View.GONE
                 }
             }
         }
@@ -71,6 +82,67 @@ class QuoteListFragment : Fragment() {
         binding.rvQuotes.apply {
             layoutManager = LinearLayoutManager(requireActivity())
             adapter = quotesAdapter
+        }
+    }
+
+    private fun makeSpannableString() {
+        val noNetworkStr =
+            "No network! Please check your internet connection and\ntry again or load data from local server"
+
+        val spannableString = SpannableString(noNetworkStr)
+        // Define clickable span for "try again"
+        val tryAgainStart = noNetworkStr.indexOf("try again")
+        val tryAgainEnd = tryAgainStart + "try again".length
+
+        val tryAgainSpan = object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                // Try fetching quotes again
+                val randomNumber = (Math.random() * 10).toInt()
+                quoteViewModel.retryFetchingQuotes(randomNumber)
+            }
+
+            override fun updateDrawState(ds: TextPaint) {
+                super.updateDrawState(ds)
+                ds.color = Color.BLUE
+                ds.isUnderlineText = false
+            }
+        }
+
+        spannableString.setSpan(
+            tryAgainSpan,
+            tryAgainStart,
+            tryAgainEnd,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+
+        // Define clickable span for "load data"
+        val loadDataStart = noNetworkStr.indexOf("load data")
+        val loadDataEnd = loadDataStart + "load data".length
+
+        val loadDataSpan = object : ClickableSpan() {
+            override fun onClick(widget: View) {
+                // Load quotes from DB
+                quoteViewModel.loadQuotesFromDB()
+            }
+
+            override fun updateDrawState(ds: TextPaint) {
+                super.updateDrawState(ds)
+                ds.color = Color.BLUE
+                ds.isUnderlineText = false
+            }
+        }
+
+        spannableString.setSpan(
+            loadDataSpan,
+            loadDataStart,
+            loadDataEnd,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+
+        binding.tvNoNetwork.apply {
+            text = spannableString
+            movementMethod = LinkMovementMethod.getInstance()
+            highlightColor = Color.TRANSPARENT
         }
     }
 
